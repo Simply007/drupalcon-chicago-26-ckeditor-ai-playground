@@ -277,6 +277,6 @@ My plugin was straightforward – a simple timestamp inserter. I'm curious how i
 
 Find me at the CKEditor booth or on the conference Slack. I'd love to hear your stories.
 
-The module with all the files is available at `web/modules/custom/ckeditor5_timestamp/` – including the SKILL.md and PROMPT.md templates ready for your next experiment.
+You can check out the files like PROMPT.md and SKILL.md as well as the module files in the [GitHub repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground).
 
 Let's get to it!
