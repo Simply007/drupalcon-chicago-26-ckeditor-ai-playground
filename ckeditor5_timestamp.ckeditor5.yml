@@ -1,0 +1,11 @@
+ckeditor5_timestamp_timestamp:
+  ckeditor5:
+    plugins:
+      - timestamp.Timestamp
+  drupal:
+    label: Timestamp
+    library: ckeditor5_timestamp/timestamp
+    toolbar_items:
+      timestamp:
+        label: Timestamp
+    elements: false

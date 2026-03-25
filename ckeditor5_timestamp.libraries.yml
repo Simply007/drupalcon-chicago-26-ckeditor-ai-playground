@@ -1,0 +1,5 @@
+timestamp:
+  js:
+    js/build/timestamp.js: { minified: true }
+  dependencies:
+    - core/ckeditor5

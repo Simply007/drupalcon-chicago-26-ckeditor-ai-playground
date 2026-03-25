@@ -1,0 +1,5 @@
+name: CKEditor 5 Timestamp
+type: module
+description: 'Adds a CKEditor 5 plugin that inserts the current timestamp at the cursor position.'
+package: CKEditor
+core_version_requirement: '^10.1 || ^11'
