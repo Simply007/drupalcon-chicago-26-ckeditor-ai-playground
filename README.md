@@ -15,12 +15,14 @@ A Drupal module that adds a CKEditor 5 toolbar button to insert the current time
 ### Installation
 
 1. Copy this module to your Drupal installation:
+
    ```bash
    # Place in modules/custom/ directory
    cp -r ckeditor5_timestamp /path/to/drupal/web/modules/custom/
    ```
 
 2. Enable the module:
+
    ```bash
    drush en ckeditor5_timestamp
    drush cr
@@ -43,6 +45,7 @@ This project is designed to help you create your own CKEditor 5 plugins for Drup
 ### [SKILL.md](SKILL.md)
 
 A comprehensive guide teaching Claude Code (or any developer) how to:
+
 - Explore existing CKEditor implementations in a Drupal codebase
 - Create all necessary module files
 - Handle the DLL bundling requirement
@@ -51,13 +54,14 @@ A comprehensive guide teaching Claude Code (or any developer) how to:
 ### [PROMPT.md](PROMPT.md)
 
 A customizable template for creating new plugins:
+
 - Replace the plugin requirements with yours
 - Specify your module name
 - Define the UI type you need (toolbar, context menu, etc.)
 
 ### Creating Your Own Plugin
 
-```
+```text
 Please create a CKEditor 5 plugin for Drupal following the SKILL.md approach.
 
 My requirements:
@@ -138,6 +142,7 @@ editor.conversion.elementToElement({
 ```
 
 Update `.ckeditor5.yml` to declare allowed elements:
+
 ```yaml
 elements:
   - <div class="my-class">
@@ -145,7 +150,7 @@ elements:
 
 ## Project Structure
 
-```
+```text
 ckeditor5_timestamp/
 ├── ckeditor5_timestamp.info.yml      # Module metadata
 ├── ckeditor5_timestamp.ckeditor5.yml # CKEditor plugin definition
@@ -169,32 +174,60 @@ ckeditor5_timestamp/
 
 Drupal's CKEditor 5 uses a **DLL (Dynamic Link Library) pattern**. Raw ES modules will not work and will produce:
 
-```
+```text
 Uncaught SyntaxError: Cannot use import statement outside a module
 ```
 
 **Solution**: Plugins must be bundled in UMD format and export to the `CKEditor5.{namespace}` global. The bundled version goes in `js/build/`.
 
 For details, see:
+
 - [CKEditor DLL Architecture](https://ckeditor.com/blog/ckeditor-14-updates-to-move-faster/#developer-experience-improvements)
 - [Import Maps Discussion](https://github.com/ckeditor/ckeditor5/issues/15739) (future improvements)
 
 ## Resources
 
-| Resource | Description |
-|----------|-------------|
-| [SKILL.md](SKILL.md) | Comprehensive guide for creating CKEditor 5 plugins |
-| [PROMPT.md](PROMPT.md) | Template prompt for Claude Code |
-| [Article.md](Article.md) | The full DrupalCon Chicago story |
+| Resource                  | Description                                       |
+| ------------------------- | ------------------------------------------------- |
+| [SKILL.md](SKILL.md)      | Comprehensive guide for creating CKEditor 5 plugins |
+| [PROMPT.md](PROMPT.md)    | Template prompt for Claude Code                   |
+| [Article.md](Article.md)  | The full DrupalCon Chicago story                  |
 | [GitHub Repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground) | Source code and updates |
 
 ## Compatibility
 
-| Component | Version |
-|-----------|---------|
-| Drupal | 10.1+ and 11.x |
-| CKEditor 5 | Bundled with Drupal core |
-| PHP | 8.x+ |
+| Component  | Version                    |
+| ---------- | -------------------------- |
+| Drupal     | 10.1+ and 11.x             |
+| CKEditor 5 | Bundled with Drupal core   |
+| PHP        | 8.x+                       |
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Building the Plugin
+
+```bash
+# Install dependencies
+npm install
+
+# Build for production (minified)
+npm run build
+
+# Build for development (readable)
+npm run build:dev
+
+# Watch mode (rebuild on changes)
+npm run watch
+```
+
+### Continuous Integration
+
+The GitHub Action automatically rebuilds `js/build/timestamp.js` when changes are pushed to main. On pull requests, it builds and verifies but doesn't commit.
 
 ## License
 
