@@ -18,9 +18,9 @@ He briefed me on the essentials. And I thought: "Let me try to translate this in
 
 ### Setup
 
-* **Drupal**: 11.3.3.
-* **Tool**: Claude Code.
-* **Goal**: Create a CKEditor 5 plugin module from scratch.
+- **Drupal**: 11.3.3.
+- **Tool**: Claude Code.
+- **Goal**: Create a CKEditor 5 plugin module from scratch.
 
 ### The prompt (almost too simple)
 
@@ -34,18 +34,12 @@ That's it. Two documentation links and an invitation to ask questions.
 
 ### What happened
 
-<!-- IMAGE: Claude Code terminal session
-**Prompt for image generator:** "Screenshot of Claude Code terminal interface showing exploration output - file paths being searched, modules found like Linkit and AI CKEditor, with dark terminal theme."
-
-**Alternative:** Record a short screen capture of the Claude Code exploration phase.
--->
-
 1. **Claude explored the codebase** – it found existing CKEditor modules (Linkit, AI CKEditor) and learned from their patterns.
 
 2. **Claude asked clarifying questions**:
-   * What should the plugin do? (Insert timestamp.)
-   * What should the module be called? (ckeditor5_timestamp.)
-   * Toolbar button or context menu? (Toolbar button.)
+   - What should the plugin do? (Insert timestamp.)
+   - What should the module be called? (ckeditor5_timestamp.)
+   - Toolbar button or context menu? (Toolbar button.)
 
 3. **Claude created all the files** – module metadata, CKEditor configuration, JavaScript plugin, PHP class. Everything.
 
@@ -59,26 +53,17 @@ Let me show you what it generated.
 
 The standard `.info.yml` that tells Drupal about your module:
 
-<!-- CODE: Module info.yml file
-**Summary:** Drupal module metadata declaring the CKEditor timestamp plugin.
-**Details:** Minimal definition with name, description, package grouping, and core version compatibility.
-
 ```yaml
 name: CKEditor 5 Timestamp
 type: module
-description: 'Adds a CKEditor 5 plugin that inserts the current timestamp at the cursor position.'
+description: "Adds a CKEditor 5 plugin that inserts the current timestamp at the cursor position."
 package: CKEditor
-core_version_requirement: '^10.1 || ^11'
+core_version_requirement: "^10.1 || ^11"
 ```
--->
 
 ### CKEditor plugin definition
 
 This is where the magic happens – the `.ckeditor5.yml` file that registers your plugin with Drupal's CKEditor integration:
-
-<!-- CODE: CKEditor5 plugin YAML configuration
-**Summary:** Plugin definition connecting JavaScript to Drupal's toolbar system.
-**Details:** Maps the JavaScript plugin class to a toolbar item that editors can add to their text formats.
 
 ```yaml
 ckeditor5_timestamp_timestamp:
@@ -93,34 +78,29 @@ ckeditor5_timestamp_timestamp:
         label: Timestamp
     elements: false
 ```
--->
 
 ### JavaScript plugin
 
 The actual CKEditor 5 plugin that creates the toolbar button and handles the timestamp insertion:
 
-<!-- CODE: CKEditor 5 JavaScript plugin source
-**Summary:** ES module implementing the Timestamp toolbar button.
-**Details:** Registers a button in CKEditor's component factory that inserts the current date/time at cursor position when clicked.
-
 ```javascript
-import { Plugin } from 'ckeditor5/src/core';
-import { ButtonView } from 'ckeditor5/src/ui';
+import { Plugin } from "ckeditor5/src/core";
+import { ButtonView } from "ckeditor5/src/ui";
 
 class Timestamp extends Plugin {
   init() {
     const editor = this.editor;
 
-    editor.ui.componentFactory.add('timestamp', (locale) => {
+    editor.ui.componentFactory.add("timestamp", (locale) => {
       const button = new ButtonView(locale);
 
       button.set({
-        label: 'Timestamp',
+        label: "Timestamp",
         withText: true,
         tooltip: true,
       });
 
-      button.on('execute', () => {
+      button.on("execute", () => {
         const now = new Date();
         editor.model.change((writer) => {
           editor.model.insertContent(writer.createText(now.toString()));
@@ -133,21 +113,16 @@ class Timestamp extends Plugin {
   }
 
   static get pluginName() {
-    return 'Timestamp';
+    return "Timestamp";
   }
 }
 
 export default { Timestamp };
 ```
--->
 
 ### PHP plugin class
 
 A minimal PHP class that extends Drupal's CKEditor plugin system:
-
-<!-- CODE: PHP CKEditor5 plugin class
-**Summary:** Drupal PHP plugin class for the timestamp feature.
-**Details:** Extends CKEditor5PluginDefault – the minimal implementation needed for Drupal integration.
 
 ```php
 <?php
@@ -165,38 +140,29 @@ class Timestamp extends CKEditor5PluginDefault {
 
 }
 ```
--->
 
 ## The gotcha (there's always one)
 
 I enabled the module, cleared the cache, added the button to a text format... and hit this:
 
-```
-Uncaught SyntaxError: Cannot use import statement outside a module
-Failed to load timestamp - Timestamp
+```plain
+CKEditorError: plugincollection-plugin-not-found {"plugin":null}
+Read more: https://ckeditor.com/docs/ckeditor5/latest/support/error-codes.html#error-plugincollection-plugin-not-found
 ```
 
-<!-- IMAGE: Browser console error
-**Prompt for image generator:** "Browser developer console showing JavaScript error 'Cannot use import statement outside a module' with red error styling and stack trace visible."
-
-**Alternative:** Screenshot the actual browser console error.
--->
+![console with error](./assets/non-minified-error-screenshot.png)
 
 ### The problem
 
 Drupal's CKEditor 5 uses a **DLL (Dynamic Link Library) pattern**. Raw ES modules don't work – plugins must be bundled in UMD format that exports to the `CKEditor5.[pluginname]` namespace.
 
-This is documented in the [CKEditor 5 DLL architecture blog post](https://ckeditor.com/blog/ckeditor-14-updates-to-move-faster/#developer-experience-improvements) and there's an [ongoing discussion about import maps](https://github.com/ckeditor/ckeditor5/issues/15739) that may simplify this in the future.
-
-The good news? Drupal core is working on an [Import Maps API](https://www.drupal.org/node/3398525) that would let browsers resolve ES module imports natively – no bundling required. Once import maps land in Drupal core, you'll be able to write clean `import { Plugin } from 'ckeditor5/src/core'` statements and have the browser figure out the rest. Browser support is getting there too: Chrome 133+ and Safari already support multiple import maps, with Firefox ESR 153 expected around July 2026.
+Drupal core is discussing on an [Import Maps API](https://www.drupal.org/node/3398525) that might let browsers resolve ES module imports natively – no bundling to UDM required. If import maps land in Drupal core, you'll be able to write clean `import { Plugin } from 'ckeditor5/src/core'` statements and have the browser figure out the rest. [Browser support for import maps](https://caniuse.com/?search=import+map) is getting there too: Chrome 133+ and Safari already support multiple import maps, with Firefox ESR 153 expected around July 2026.
 
 ### The fix
 
 Claude created a properly bundled version in `js/build/timestamp.js` and updated the library configuration to point to it:
 
-<!-- CODE: Updated libraries.yml pointing to bundled JS
-**Summary:** Library definition using the bundled UMD JavaScript instead of raw ES modules.
-**Details:** The minified flag tells Drupal not to process the file further.
+<!-- TODO  - explain the section about the build and what I used: webpack in this case -->
 
 ```yaml
 timestamp:
@@ -205,7 +171,6 @@ timestamp:
   dependencies:
     - core/ckeditor5
 ```
--->
 
 **Total additional time**: About 2 minutes.
 
@@ -230,21 +195,25 @@ sequenceDiagram
 ```
 -->
 
+![Timestamp plugin showcase](./assets/screenshot-drupal.png)
+
+![Timestamp diagram flow](./assets/plugin-flow.png)
+
 ## What you get
 
 Two files that can help you extend CKEditor:
 
 1. **SKILL.md** – A comprehensive guide teaching Claude Code how to:
-   * Explore existing CKEditor implementations.
-   * Ask the right clarifying questions.
-   * Create all necessary files.
-   * Handle the DLL bundling requirement.
-   * Troubleshoot common issues.
+   - Explore existing CKEditor implementations.
+   - Ask the right clarifying questions.
+   - Create all necessary files.
+   - Handle the DLL bundling requirement.
+   - Troubleshoot common issues.
 
 2. **PROMPT.md** – A template you can customize:
-   * Replace the plugin requirements with yours.
-   * Specify your module name.
-   * Define the UI type you need.
+   - Replace the plugin requirements with yours.
+   - Specify your module name.
+   - Define the UI type you need.
 
 ## How to use it
 
@@ -253,11 +222,12 @@ Two files that can help you extend CKEditor:
 2. **Put the files in your Drupal project**.
 
 3. **Adjust PROMPT.md** with your requirements:
-   * Plugin function: What should it do?
-   * Module name: your_module_name.
-   * UI type: Toolbar button, context menu, etc.
+   - Plugin function: What should it do?
+   - Module name: your_module_name.
+   - UI type: Toolbar button, context menu, etc.
 
 4. **Ask Claude to run it**:
+
    > Please create a CKEditor 5 plugin for Drupal following the SKILL.md approach using the requirements in PROMPT.md
 
 5. **Enable and configure**:
@@ -271,12 +241,14 @@ Two files that can help you extend CKEditor:
 
 My plugin was straightforward – a simple timestamp inserter. I'm curious how it works for you with more complex requirements.
 
-* Did it work on the first try?
-* What gotchas did you encounter?
-* How complex was your plugin?
+- Did it work on the first try?
+- What gotchas did you encounter?
+- How complex was your plugin?
 
 Find me at the CKEditor booth or on the conference Slack. I'd love to hear your stories.
 
 You can check out the files like PROMPT.md and SKILL.md as well as the module files in the [GitHub repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground).
+
+<!-- TODO: Extend the information about the build and github actions in the form of something like - and next to the SKILL and PROMPT, you have also this template with GitHub actions and webpack confing you can you to build and check you minified version oj your javascript.-->
 
 Let's get to it!
