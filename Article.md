@@ -231,10 +231,12 @@ Two files that can help you extend CKEditor:
    > Please create a CKEditor 5 plugin for Drupal following the SKILL.md approach using the requirements in PROMPT.md
 
 5. **Enable and configure**:
+
    ```bash
    drush en your_module_name
    drush cr
    ```
+
    Then configure the text format in Drupal admin to add your new button.
 
 ## Try it yourself
