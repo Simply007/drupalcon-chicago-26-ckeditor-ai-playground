@@ -1,1 +1,17 @@
+# macOS
 .DS_Store
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Note: js/build/ is NOT ignored - the built file must be committed for Drupal
