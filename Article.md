@@ -1,5 +1,7 @@
 # How I vibe-coded my first custom module extending CKEditor without writing a single line of code
 
+cheged
+
 I was at DrupalCon Chicago, juggling booth duty, an AI Summit talk, and a Lightning Talk about CKEditor's contrib modules. But it's those hallway conversations that stick with you – and this time, the same question kept coming up.
 
 > "How do I customize CKEditor just a little bit?"
