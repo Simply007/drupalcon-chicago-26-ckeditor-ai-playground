@@ -2,11 +2,11 @@
 
 I was at DrupalCon Chicago, juggling booth duty, an AI Summit talk, and a Lightning Talk about CKEditor's contrib modules. But it's those hallway conversations that stick with you – and this time, the same question kept coming up.
 
-"How do I customize CKEditor just a little bit?"
+> "How do I customize CKEditor just a little bit?"
 
-"Can I add my own button?"
+> "Can I add my own button?"
 
-"I want something specific to our workflow, but where do I even start?"
+> "I want something specific to our workflow, but where do I even start?"
 
 People knew what they wanted. They just didn't know how to get there.
 
