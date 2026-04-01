@@ -1,18 +1,18 @@
 # How I vibe-coded my first custom module extending CKEditor without writing a single line of code
 
-I was at DrupalCon Chicago, juggling booth duty, an AI Summit talk, and a Lightning Talk about CKEditor's contrib modules. But it's those hallway conversations that stick with you – and this time, the same question kept coming up.
+I was at [DrupalCon Chicago 2026](https://events.drupal.org/chicago2026), juggling booth duty, an AI Summit talk, and a Lightning Talk about CKEditor's contrib modules. **But it's those hallway conversations that stick with you – and this time, the same question kept coming up.**
 
-> "How do I customize CKEditor just a little bit?"
-
-> "Can I add my own button?"
-
-> "I want something specific to our workflow, but where do I even start?"
+> - "How do I customize CKEditor just a little bit?"
+> - "Can I add my own button?"
+> - "I want something specific to our workflow, but where do I even start?"
 
 People knew what they wanted. They just didn't know how to get there.
 
-So I grabbed Wojtek Kukowski – the main maintainer of the CKEditor Drupal integration – and asked him: "What's actually required to make this happen?"
+So I grabbed [Wojtek Kukowski](https://www.drupal.org/u/salmonek) – the main maintainer of the CKEditor Drupal modules ([CKEditor 5 Plugin Pack](https://www.drupal.org/project/ckeditor5_plugin_pack) and [CKEditor 5 Premium Features](https://www.drupal.org/project/ckeditor5_premium_features)), and asked him:
 
-He briefed me on the essentials. And I thought: "Let me try to translate this into a prompt for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and see what happens."
+> "What's actually required to make CKEditor plugin extension for Drupal?"
+
+He briefed me on the essentials: create a Drupal Module that is wrapping CKEditor Plugin. And I thought: "Let me try to translate this into a prompt for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and include the official docs and see what happens."
 
 ## The experiment
 
@@ -20,7 +20,7 @@ He briefed me on the essentials. And I thought: "Let me try to translate this in
 
 - **Drupal**: 11.3.3.
 - **Tool**: Claude Code.
-- **Goal**: Create a CKEditor 5 plugin module from scratch.
+- **Goal**: Create a Drupal module with CKEditor 5 plugin from scratch.
 
 ### The prompt (almost too simple)
 
@@ -34,11 +34,11 @@ That's it. Two documentation links and an invitation to ask questions.
 
 ### What happened
 
-1. **Claude explored the codebase** – it found existing CKEditor modules (Linkit, AI CKEditor) and learned from their patterns.
+1. **Claude explored the codebase** – I was prompting in the local project with CKEditor AI running. It found existing CKEditor modules ([CKEditor 5 Plugin Pack](https://www.drupal.org/project/ckeditor5_plugin_pack) and [CKEditor 5 Premium Features](https://www.drupal.org/project/ckeditor5_premium_features) in my case) and learned from their patterns.
 
 2. **Claude asked clarifying questions**:
    - What should the plugin do? (Insert timestamp.)
-   - What should the module be called? (ckeditor5_timestamp.)
+   - What should the module be called? (`ckeditor5_timestamp`)
    - Toolbar button or context menu? (Toolbar button.)
 
 3. **Claude created all the files** – module metadata, CKEditor configuration, JavaScript plugin, PHP class. Everything.
@@ -48,6 +48,8 @@ That's it. Two documentation links and an invitation to ask questions.
 Let me show you what it generated.
 
 ## The files Claude created
+
+*All in `~/web/modules/custom/ckeditor5_timestamp`.*
 
 ### Module metadata
 
@@ -263,7 +265,7 @@ You can check out the files like PROMPT.md and SKILL.md as well as the module fi
 
 The same "reverse engineering" approach I used for the webpack configuration also created the SKILL.md and PROMPT.md files. After Claude successfully built the plugin, I backtracked through its actions – what did it explore? What questions did it ask? What files did it create? – and distilled that into reusable instructions.
 
-I do this whenever I need repeatable context. Instead of relying solely on a project-wide CLAUDE.md file, I create focused instruction files for specific tasks. The SKILL.md teaches Claude *how* to build CKEditor plugins; the PROMPT.md provides the *what* – the specific requirements for each new plugin.
+I do this whenever I need repeatable context. Instead of relying solely on a project-wide CLAUDE.md file, I create focused instruction files for specific tasks. The SKILL.md teaches Claude _how_ to build CKEditor plugins; the PROMPT.md provides the _what_ – the specific requirements for each new plugin.
 
 ### CI for the build
 
@@ -272,3 +274,15 @@ Similarly, I asked Claude to generate a GitHub Actions workflow that builds the 
 ### Making it community-friendly
 
 To make this repository truly accessible as a starting point, more work would be needed: proper documentation, contribution guidelines, issue templates, and licensing clarity. I maintain a template for this at [os-guidelines](https://github.com/Simply007/os-guidelines) – a checklist covering everything from repository naming to CI automation across different tech stacks. If you're publishing your own CKEditor plugin module, consider using it as a starting point.
+
+---
+
+## Want to learn more?
+
+- **Create your own plugin**: Check out the [CKEditor 5 plugin development guide](https://ckeditor.com/docs/ckeditor5/latest/framework/tutorials/creating-simple-plugin-timestamp.html) for the full tutorial on building custom plugins from scratch. Once you're comfortable with the basics, explore more capabilities – [toolbar customization](https://ckeditor.com/docs/ckeditor5/latest/getting-started/setup/toolbar.html), [editor behavior hooks](https://ckeditor.com/docs/ckeditor5/latest/framework/architecture/editing-engine.html), and [custom commands](https://ckeditor.com/docs/ckeditor5/latest/framework/architecture/core-editor-architecture.html#commands).
+
+- **Try CKEditor AI**: The [AI capabilities](https://ckeditor.com/ckeditor-5/capabilities/ai-features/) have been in CKEditor since last year and are gaining adoption across the ecosystem. Drupal support landed just a week before DrupalCon – perfect timing! You can [try the demo](https://ckeditor.com/ckeditor-5/capabilities/ai-features/) right in your browser, or grab a [free 14-day trial](https://portal.ckeditor.com/signup/) to test it in your own Drupal installation.
+
+- **Grab the code**: All the files from this article – SKILL.md, PROMPT.md, the complete module, webpack config, and GitHub Actions workflow – are available in the [GitHub repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground).
+
+Enjoy! And if you have any question - the comments section is yours! 🥑
