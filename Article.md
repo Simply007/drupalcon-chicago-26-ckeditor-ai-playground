@@ -10,9 +10,9 @@ People knew what they wanted. They just didn't know how to get there.
 
 So I grabbed [Wojtek Kukowski](https://www.drupal.org/u/salmonek) – the main maintainer of the CKEditor Drupal modules ([CKEditor 5 Plugin Pack](https://www.drupal.org/project/ckeditor5_plugin_pack) and [CKEditor 5 Premium Features](https://www.drupal.org/project/ckeditor5_premium_features)), and asked him:
 
-> "What's actually required to make CKEditor plugin extension for Drupal?"
+> "What's actually required to make a CKEditor plugin extension for Drupal?"
 
-He briefed me on the essentials: create a Drupal Module that is wrapping CKEditor Plugin. And I thought: "Let me try to translate this into a prompt for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and include the official docs and see what happens."
+He briefed me on the essentials: create a Drupal module that wraps a CKEditor plugin. And I thought: "Let me try to translate this into a prompt for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and include the official docs and see what happens."
 
 ## The experiment
 
@@ -20,7 +20,7 @@ He briefed me on the essentials: create a Drupal Module that is wrapping CKEdito
 
 - **Drupal**: 11.3.3.
 - **Tool**: Claude Code.
-- **Goal**: Create a Drupal module with CKEditor 5 plugin from scratch.
+- **Goal**: Create a Drupal module with a CKEditor 5 plugin from scratch.
 
 ### The prompt (almost too simple)
 
@@ -158,19 +158,11 @@ Read more: https://ckeditor.com/docs/ckeditor5/latest/support/error-codes.html#e
 
 Drupal's CKEditor 5 uses a **DLL (Dynamic Link Library) pattern**. Raw ES modules don't work – plugins must be bundled in UMD format that exports to the `CKEditor5.[pluginname]` namespace.
 
-Drupal core is discussing on an [Import Maps API](https://www.drupal.org/node/3398525) that might let browsers resolve ES module imports natively – no bundling to UDM required. If import maps land in Drupal core, you'll be able to write clean `import { Plugin } from 'ckeditor5/src/core'` statements and have the browser figure out the rest. [Browser support for import maps](https://caniuse.com/?search=import+map) is getting there too: Chrome 133+ and Safari already support multiple import maps, with Firefox ESR 153 expected around July 2026.
+Drupal core is discussing an [Import Maps API](https://www.drupal.org/node/3398525) that might let browsers resolve ES module imports natively – no bundling to UMD required. If import maps land in Drupal core, you'll be able to write clean `import { Plugin } from 'ckeditor5/src/core'` statements and have the browser figure out the rest. [Browser support for import maps](https://caniuse.com/?search=import+map) is getting there too: Chrome 133+ and Safari already support multiple import maps, with Firefox ESR 153 expected around July 2026.
 
 ### The fix
 
 Claude created a properly bundled version in `js/build/timestamp.js` and updated the library configuration to point to it:
-
-### The build setup
-
-The first attempt was straightforward – Claude built the JavaScript directly via command line without any infrastructure. When that worked, I asked Claude to set up a proper build configuration. It chose webpack – a sensible default given that [CKEditor's own documentation](https://ckeditor.com/docs/ckeditor5/latest/getting-started/legacy/installation-methods/quick-start-other.html) uses webpack in its examples.
-
-According to CKEditor's [new installation methods documentation](https://ckeditor.com/docs/ckeditor5/latest/updating/nim-migration/migration-to-new-installation-methods.html), CKEditor 5 became "bundler-agnostic" starting from version 42.0.0 – so Vite, esbuild, or Rollup should also work. However, for Drupal's DLL (Dynamic Link Library) pattern, webpack remains the most documented path. The configuration Claude generated uses `DllReferencePlugin` to link with CKEditor 5's DLL architecture – exporting to the `CKEditor5.timestamp` namespace that Drupal expects.
-
-I call this approach "reverse engineering" – I didn't specify webpack upfront. Claude explored existing CKEditor modules in the codebase, saw they used webpack, and followed the pattern.
 
 ```yaml
 timestamp:
@@ -202,10 +194,19 @@ sequenceDiagram
     Editor->>User: Timestamp appears at cursor
 ```
 -->
+))
 
 ![Timestamp plugin showcase](./assets/screenshot-drupal.png)
 
 ![Timestamp diagram flow](./assets/plugin-flow.png)
+
+### The build setup
+
+The first attempt was straightforward – Claude built the JavaScript directly via command line without any infrastructure. When that worked, I asked Claude to set up a proper build configuration. It chose webpack – a sensible default given that [CKEditor's own documentation](https://ckeditor.com/docs/ckeditor5/latest/getting-started/legacy/installation-methods/quick-start-other.html) uses webpack in its examples.
+
+According to CKEditor's [new installation methods documentation](https://ckeditor.com/docs/ckeditor5/latest/updating/nim-migration/migration-to-new-installation-methods.html), CKEditor 5 became "bundler-agnostic" starting from version 42.0.0 – so Vite, esbuild, or Rollup should also work. However, for Drupal's DLL (Dynamic Link Library) pattern, webpack remains the most documented path. The configuration Claude generated uses `DllReferencePlugin` to link with CKEditor 5's DLL architecture – exporting to the `CKEditor5.timestamp` namespace that Drupal expects.
+
+It is kinda "reverse engineering" approach – I didn't specify webpack upfront. Claude explored existing CKEditor modules in the codebase, saw they used webpack, and followed the pattern.
 
 ## What you get
 
@@ -285,4 +286,4 @@ To make this repository truly accessible as a starting point, more work would be
 
 - **Grab the code**: All the files from this article – SKILL.md, PROMPT.md, the complete module, webpack config, and GitHub Actions workflow – are available in the [GitHub repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground).
 
-Enjoy! And if you have any question - the comments section is yours! 🥑
+Enjoy! And if you have any questions – the comments section is yours! 🥑
