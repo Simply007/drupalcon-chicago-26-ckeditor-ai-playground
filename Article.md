@@ -162,7 +162,13 @@ Drupal core is discussing on an [Import Maps API](https://www.drupal.org/node/33
 
 Claude created a properly bundled version in `js/build/timestamp.js` and updated the library configuration to point to it:
 
-<!-- TODO  - explain the section about the build and what I used: webpack in this case -->
+### The build setup
+
+The first attempt was straightforward – Claude built the JavaScript directly via command line without any infrastructure. When that worked, I asked Claude to set up a proper build configuration. It chose webpack – a sensible default given that [CKEditor's own documentation](https://ckeditor.com/docs/ckeditor5/latest/getting-started/legacy/installation-methods/quick-start-other.html) uses webpack in its examples.
+
+According to CKEditor's [new installation methods documentation](https://ckeditor.com/docs/ckeditor5/latest/updating/nim-migration/migration-to-new-installation-methods.html), CKEditor 5 became "bundler-agnostic" starting from version 42.0.0 – so Vite, esbuild, or Rollup should also work. However, for Drupal's DLL (Dynamic Link Library) pattern, webpack remains the most documented path. The configuration Claude generated uses `DllReferencePlugin` to link with CKEditor 5's DLL architecture – exporting to the `CKEditor5.timestamp` namespace that Drupal expects.
+
+I call this approach "reverse engineering" – I didn't specify webpack upfront. Claude explored existing CKEditor modules in the codebase, saw they used webpack, and followed the pattern.
 
 ```yaml
 timestamp:
@@ -251,6 +257,18 @@ Find me at the CKEditor booth or on the conference Slack. I'd love to hear your 
 
 You can check out the files like PROMPT.md and SKILL.md as well as the module files in the [GitHub repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground).
 
-<!-- TODO: Extend the information about the build and github actions in the form of something like - and next to the SKILL and PROMPT, you have also this template with GitHub actions and webpack confing you can you to build and check you minified version oj your javascript.-->
+## Beyond the plugin
 
-Let's get to it!
+### How the SKILL.md and PROMPT.md came to be
+
+The same "reverse engineering" approach I used for the webpack configuration also created the SKILL.md and PROMPT.md files. After Claude successfully built the plugin, I backtracked through its actions – what did it explore? What questions did it ask? What files did it create? – and distilled that into reusable instructions.
+
+I do this whenever I need repeatable context. Instead of relying solely on a project-wide CLAUDE.md file, I create focused instruction files for specific tasks. The SKILL.md teaches Claude *how* to build CKEditor plugins; the PROMPT.md provides the *what* – the specific requirements for each new plugin.
+
+### CI for the build
+
+Similarly, I asked Claude to generate a GitHub Actions workflow that builds the JavaScript on every push to main. If the bundled output changes, the action commits it automatically. This keeps the repository's `js/build/timestamp.js` in sync without manual intervention – useful for contributors who might not have Node.js set up locally.
+
+### Making it community-friendly
+
+To make this repository truly accessible as a starting point, more work would be needed: proper documentation, contribution guidelines, issue templates, and licensing clarity. I maintain a template for this at [os-guidelines](https://github.com/Simply007/os-guidelines) – a checklist covering everything from repository naming to CI automation across different tech stacks. If you're publishing your own CKEditor plugin module, consider using it as a starting point.
