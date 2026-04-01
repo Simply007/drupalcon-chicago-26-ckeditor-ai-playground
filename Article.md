@@ -156,7 +156,7 @@ Read more: https://ckeditor.com/docs/ckeditor5/latest/support/error-codes.html#e
 
 ### The problem
 
-Drupal's CKEditor 5 uses a **DLL (Dynamic Link Library) pattern**. Raw ES modules don't work – plugins must be bundled in UMD format that exports to the `CKEditor5.[pluginname]` namespace.
+Drupal's CKEditor 5 uses a **DLL (Dynamic Link Library) pattern** – webpack-specific builds that register plugins to the global `CKEditor5` variable. Raw ES modules don't work – plugins must be bundled and exported to the `CKEditor5.[pluginname]` namespace.
 
 Drupal core is discussing an [Import Maps API](https://www.drupal.org/node/3398525) that might let browsers resolve ES module imports natively – no bundling to UMD required. If import maps land in Drupal core, you'll be able to write clean `import { Plugin } from 'ckeditor5/src/core'` statements and have the browser figure out the rest. [Browser support for import maps](https://caniuse.com/?search=import+map) is getting there too: Chrome 133+ and Safari already support multiple import maps, with Firefox ESR 153 expected around July 2026.
 
