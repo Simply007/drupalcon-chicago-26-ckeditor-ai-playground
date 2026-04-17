@@ -2,7 +2,8 @@
 
 A Drupal module that adds a CKEditor 5 toolbar button to insert the current timestamp at the cursor position.
 
-**Want the full story?** Read [Article.md](Article.md) to learn how this plugin was created using Claude Code at DrupalCon Chicago 2026.
+**Want the full story?** Read [DrupalCon Chicago 2026: How I vibe-coded my first custom Drupal module extending CKEditor
+](https://dev.to/ckeditor/drupalcon-chicago-2026-how-i-vibe-coded-my-first-custom-drupal-module-extending-ckeditor-59mn) to learn how this plugin was created using Claude Code at DrupalCon Chicago 2026.
 
 ## Quick Start
 
@@ -84,10 +85,10 @@ When creating your own plugin, consider these extension options:
 
 ```javascript
 button.set({
-  label: 'My Plugin',     // Button text
-  withText: true,         // Show text (false = icon only)
-  tooltip: true,          // Enable tooltip on hover
-  icon: mySvgIcon,        // Custom SVG icon
+  label: "My Plugin", // Button text
+  withText: true, // Show text (false = icon only)
+  tooltip: true, // Enable tooltip on hover
+  icon: mySvgIcon, // Custom SVG icon
 });
 ```
 
@@ -102,7 +103,7 @@ my_plugin_id:
       - myPlugin.MyPlugin
     config:
       myPlugin:
-        defaultValue: 'example'
+        defaultValue: "example"
   drupal:
     label: My Plugin
     library: my_module/my_plugin
@@ -118,7 +119,7 @@ my_plugin_id:
 For plugins requiring user input, use CKEditor 5's dialog system:
 
 ```javascript
-import { Dialog } from 'ckeditor5/src/ui';
+import { Dialog } from "ckeditor5/src/ui";
 
 // Create a dialog with form inputs
 // See: https://ckeditor.com/docs/ckeditor5/latest/framework/architecture/ui-library.html
@@ -130,14 +131,14 @@ For plugins that create new HTML elements:
 
 ```javascript
 // Define schema
-editor.model.schema.register('myElement', {
-  inheritAllFrom: '$block'
+editor.model.schema.register("myElement", {
+  inheritAllFrom: "$block",
 });
 
 // Define conversion (model <-> view)
 editor.conversion.elementToElement({
-  model: 'myElement',
-  view: 'div'
+  model: "myElement",
+  view: "div",
 });
 ```
 
@@ -167,7 +168,6 @@ ckeditor5_timestamp/
 │           └── Timestamp.php         # PHP plugin class
 ├── SKILL.md                          # Guide for creating plugins
 ├── PROMPT.md                         # Customizable prompt template
-└── Article.md                        # Full story/blog post
 ```
 
 ## Important: DLL Bundling Pattern
@@ -187,20 +187,19 @@ For details, see:
 
 ## Resources
 
-| Resource                  | Description                                       |
-| ------------------------- | ------------------------------------------------- |
-| [SKILL.md](SKILL.md)      | Comprehensive guide for creating CKEditor 5 plugins |
-| [PROMPT.md](PROMPT.md)    | Template prompt for Claude Code                   |
-| [Article.md](Article.md)  | The full DrupalCon Chicago story                  |
-| [GitHub Repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground) | Source code and updates |
+| Resource                                                                                      | Description                                         |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [SKILL.md](SKILL.md)                                                                          | Comprehensive guide for creating CKEditor 5 plugins |
+| [PROMPT.md](PROMPT.md)                                                                        | Template prompt for Claude Code                     |
+| [GitHub Repository](https://github.com/Simply007/drupalcon-chicago-26-ckeditor-ai-playground) | Source code and updates                             |
 
 ## Compatibility
 
-| Component  | Version                    |
-| ---------- | -------------------------- |
-| Drupal     | 10.1+ and 11.x             |
-| CKEditor 5 | Bundled with Drupal core   |
-| PHP        | 8.x+                       |
+| Component  | Version                  |
+| ---------- | ------------------------ |
+| Drupal     | 10.1+ and 11.x           |
+| CKEditor 5 | Bundled with Drupal core |
+| PHP        | 8.x+                     |
 
 ## Development
 
