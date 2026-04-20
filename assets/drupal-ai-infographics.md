@@ -6,23 +6,238 @@ This document provides comprehensive visualizations and terminology definitions 
 
 ## Table of Contents
 
-1. [Conceptual Diagrams](#conceptual-diagrams)
+1. [Drupal AI Entities Explained](#drupal-ai-entities-explained)
+   - [Entity Relationship Diagram](#entity-relationship-diagram)
+   - [Entity Definitions](#entity-definitions-summary)
+   - [AI Prompt Use Cases](#ai-prompt-use-cases)
+2. [Conceptual Diagrams](#conceptual-diagrams)
    - [Architecture Overview](#1-architecture-overview-conceptual)
    - [Agent Workflow](#2-agent-workflow-conceptual)
    - [Capabilities Mind Map](#3-capabilities-mind-map)
-2. [Technical Diagrams](#technical-diagrams)
+3. [Technical Diagrams](#technical-diagrams)
    - [Architecture Detailed](#4-architecture-detailed-technical)
    - [Agent Loop Sequence](#5-agent-loop-sequence-technical)
    - [Entity Relationships](#6-entity-relationships)
    - [Orchestration Pattern](#7-orchestration-pattern)
-3. [Your Configuration](#your-specific-configuration)
+4. [Your Configuration](#your-specific-configuration)
    - [Provider Mapping](#8-your-provider-mapping)
    - [Capability Matrix](#capability-matrix)
-4. [Complete Ecosystem](#9-complete-ecosystem-overview)
-5. [Glossary](#glossary)
+5. [Complete Ecosystem](#9-complete-ecosystem-overview)
+6. [Glossary](#glossary)
    - [AI Core Terms](#ai-core-terms)
    - [Drupal AI Entities](#drupal-ai-entities)
    - [Operation Types](#operation-types-capabilities)
+
+---
+
+# Drupal AI Entities Explained
+
+This section provides a focused overview of the core Drupal AI entities and how they work together. Understanding these relationships is key to leveraging the full power of Drupal's AI ecosystem.
+
+## Entity Relationship Diagram
+
+```mermaid
+flowchart TB
+    subgraph External["External AI Services"]
+        LLM["LLMs<br><small>OpenAI, Anthropic, Ollama, etc.</small>"]
+    end
+
+    subgraph ProviderLayer["AI Provider Layer"]
+        Provider["<b>AI Provider</b><br><small>Wraps ALL LLM communication</small>"]
+        Operations["Operation Types<br><small>Chat, Embeddings, TTS, STT, Moderation</small>"]
+        Provider --> Operations
+    end
+
+    subgraph Consumers["Consumer Entities"]
+        Agent["<b>AI Agent</b><br><small>Autonomous system with tools</small><br><small>Loops until task complete</small>"]
+        Assistant["<b>AI Assistant</b><br><small>Chatbot configuration</small><br><small>User-facing conversations</small>"]
+        Automator["<b>AI Automator</b><br><small>Field-level automation</small><br><small>Triggered on entity save</small>"]
+    end
+
+    Prompt["<b>AI Prompt</b><br><small>Reusable prompt templates</small>"]
+
+    Tool["<b>AI Tool</b><br><small>Executable actions for Agents</small><br><small>(Function Calls, Assistant Actions)</small>"]
+
+    LLM <--> Provider
+
+    Operations --> Agent
+    Operations --> Assistant
+    Operations --> Automator
+
+    Prompt -.->|"provides prompts"| Agent
+    Prompt -.->|"provides prompts"| Assistant
+    Prompt -.->|"provides prompts"| Automator
+
+    Tool -.->|"available to"| Agent
+
+    style Provider fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Agent fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Assistant fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Automator fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style Prompt fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Tool fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+```
+
+## Entity Definitions Summary
+
+| Entity | Type | What It Does | Official Documentation |
+|--------|------|--------------|------------------------|
+| **AI Provider** | Plugin | **The foundation layer** - wraps ALL communication with external LLMs. Handles API calls, authentication, and translates Drupal requests into service-specific API interactions. Every other entity goes through a Provider. | [Writing an AI Provider](https://project.pages.drupalcode.org/ai/2.0.x/developers/writing_an_ai_provider/) |
+| **AI Agent** | Config Entity | **Autonomous AI system** - has a system prompt, available tools (function calls), and runs in a loop until the task is complete. Can use tools to modify Drupal config, create content, and even orchestrate other agents. Most powerful entity. | [Building an Agent](https://project.pages.drupalcode.org/ai/2.0.x/agents/build_agent/) |
+| **AI Assistant** | Config Entity | **Chatbot configuration** - normalizes interactions between users and LLMs as chatbots. Defines which "actions" (not tools) the chatbot can trigger. Powers the AI Chatbot UI module. | [AI Assistant API](https://project.pages.drupalcode.org/ai/2.0.x/modules/ai_assistant_api/) |
+| **AI Automator** | Config Entity | **Field-level automation** - attaches to specific entity fields and automatically generates/modifies field values when content is saved. Can chain multiple automators for complex workflows. | [AI Automators](https://project.pages.drupalcode.org/ai/2.0.x/modules/ai_automators/) |
+| **AI Prompt** | Config Entity | **Reusable prompt templates** - stores prompt text with variables (`{word}`) and tokens (`[node:title]`). Bundled by AI Prompt Type. Enables centralized prompt management across all AI features. | [Prompt Management](https://project.pages.drupalcode.org/ai/2.0.x/developers/ai_prompt_management/) |
+| **AI Chat** | Operation Type | **Not an entity** - it's a capability/operation type that defines conversational calls to LLMs. Variants include basic chat, streaming, with tools, with vision, etc. | [Chat Call](https://project.pages.drupalcode.org/ai/2.0.x/developers/call_chat/) |
+| **AI Tool** | Plugin | **Executable actions** - plugins that AI Agents can call during their execution loop. Includes Function Calls (create content types, modify fields) and Assistant Actions (search, fetch data). The "hands" of the AI. | [Function Calling](https://project.pages.drupalcode.org/ai/2.0.x/developers/function_calling/) |
+
+## How They Work Together
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Assistant as AI Assistant<br>(Chatbot)
+    participant Agent as AI Agent
+    participant Automator as AI Automator
+    participant Prompt as AI Prompt
+    participant Provider as AI Provider
+    participant LLM as External LLM
+
+    Note over User,LLM: Scenario 1: User asks chatbot a question
+    User->>Assistant: "Create an article about cats"
+    Assistant->>Prompt: Load system prompt template
+    Prompt-->>Assistant: Prompt with variables resolved
+    Assistant->>Provider: Send chat request
+    Provider->>LLM: API call (Anthropic/OpenAI/etc)
+    LLM-->>Provider: Response
+    Provider-->>Assistant: Formatted response
+    Assistant-->>User: "Here's your article..."
+
+    Note over User,LLM: Scenario 2: Agent performs autonomous task
+    User->>Agent: "Create a Blog content type with fields"
+    Agent->>Prompt: Load agent system prompt
+    loop Agent Loop (max iterations)
+        Agent->>Provider: Chat with tools
+        Provider->>LLM: API call
+        LLM-->>Provider: "Use create_content_type tool"
+        Provider-->>Agent: Tool call request
+        Agent->>Agent: Execute tool (create content type)
+        Agent->>Provider: Report tool result
+    end
+    Agent-->>User: "Created Blog content type with 5 fields"
+
+    Note over User,LLM: Scenario 3: Automator generates field on save
+    User->>Automator: Save node (triggers automator)
+    Automator->>Prompt: Load automator prompt template
+    Prompt-->>Automator: "Summarize: [node:body]"
+    Automator->>Provider: Generate summary
+    Provider->>LLM: API call
+    LLM-->>Provider: Summary text
+    Provider-->>Automator: Response
+    Automator->>Automator: Save to summary field
+```
+
+## AI Prompt Use Cases
+
+**AI Prompt** is a shared infrastructure entity that can be used by multiple consumer entities. Here's where and how it's used:
+
+| Consumer | How AI Prompt Is Used | Example |
+|----------|----------------------|---------|
+| **AI Agent** | Defines the agent's system prompt and behavior instructions | *"You are a Drupal assistant. Use tools to help users manage content types."* |
+| **AI Assistant** | Provides the chatbot's personality and conversation style | *"You are a helpful customer service bot for {site_name}. Be friendly and concise."* |
+| **AI Automator** | Templates for field generation with token replacement | *"Generate a summary of the following content: [node:body:value]"* |
+| **AI CKEditor** | Prompts for in-editor AI assistance (tone adjustment, translation) | *"Rewrite the following text in a {tone} tone: {text}"* |
+| **AI Content** | Prompts for content operations (summarize, suggest tags) | *"Suggest 5 taxonomy terms for: [node:title]"* |
+| **Custom Modules** | Any module can load and use AI Prompts via the API | Developer-defined prompts for custom AI features |
+
+### AI Prompt Structure
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ AI Prompt Type: "content_summary"                       │
+│   - Allowed variables: {max_length}, {style}            │
+│   - Allowed tokens: [node:*], [current-user:*]          │
+├─────────────────────────────────────────────────────────┤
+│ AI Prompt: "content_summary__blog_summary"              │
+│   Prompt text:                                          │
+│   "Summarize the following blog post in {max_length}    │
+│    words using a {style} style:                         │
+│    Title: [node:title]                                  │
+│    Body: [node:body:value]"                             │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Loading AI Prompts in Code
+
+```php
+// Load an AI Prompt entity
+$prompt = \Drupal::entityTypeManager()
+  ->getStorage('ai_prompt')
+  ->load('content_summary__blog_summary');
+
+// Get the prompt text and replace variables
+$prompt_text = $prompt->get('prompt')->value;
+$prompt_text = str_replace('{max_length}', '100', $prompt_text);
+$prompt_text = str_replace('{style}', 'professional', $prompt_text);
+
+// Replace tokens using Drupal's token service
+$prompt_text = \Drupal::token()->replace($prompt_text, ['node' => $node]);
+```
+
+## Key Relationships Explained
+
+### 1. AI Provider is the Foundation
+
+Everything flows through the AI Provider. It's the **only entity that communicates with external LLMs**.
+
+```
+AI Agent ──────┐
+AI Assistant ──┼──► AI Provider ──► External LLM (OpenAI, Anthropic, etc.)
+AI Automator ──┘
+```
+
+**Source:** [AI Provider Architecture](https://project.pages.drupalcode.org/ai/2.0.x/developers/writing_an_ai_provider/)
+
+### 2. AI Agent vs AI Assistant
+
+| Aspect | AI Agent | AI Assistant |
+|--------|----------|--------------|
+| **Purpose** | Autonomous task execution | User-facing conversations |
+| **Execution** | Loops until task complete | Single request-response |
+| **Capabilities** | Uses **tools** (function calling) | Triggers **actions** (plugins) |
+| **Scope** | Can modify Drupal config, create views, etc. | Responds to user queries, triggers limited actions |
+| **Use Case** | "Create a content type with these fields" | "What are today's news articles?" |
+
+**Source:** [AI Agents Module](https://www.drupal.org/project/ai_agents) | [AI Assistant API](https://project.pages.drupalcode.org/ai/2.0.x/modules/ai_assistant_api/)
+
+### 3. AI Automator Chains
+
+Automators can be chained to create complex workflows:
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Automator 1 │───►│ Automator 2 │───►│ Automator 3 │
+│ Extract text│    │ Summarize   │    │ Translate   │
+│ from PDF    │    │ content     │    │ to Spanish  │
+└─────────────┘    └─────────────┘    └─────────────┘
+     Weight: 0          Weight: 1          Weight: 2
+```
+
+**Source:** [AI Automators Documentation](https://project.pages.drupalcode.org/ai/2.0.x/modules/ai_automators/)
+
+---
+
+## Official Resources
+
+| Resource | URL |
+|----------|-----|
+| **Drupal AI Module** | https://www.drupal.org/project/ai |
+| **AI 2.0.x Documentation** | https://project.pages.drupalcode.org/ai/2.0.x/ |
+| **AI Agents Module** | https://www.drupal.org/project/ai_agents |
+| **AI Agents Documentation** | https://project.pages.drupalcode.org/ai_agents |
+| **AI Provider Development** | https://project.pages.drupalcode.org/ai/2.0.x/developers/writing_an_ai_provider/ |
+| **AI Prompt Management** | https://project.pages.drupalcode.org/ai/2.0.x/developers/ai_prompt_management/ |
+| **AI Automators** | https://project.pages.drupalcode.org/ai/2.0.x/modules/ai_automators/ |
+| **AI Assistant API** | https://project.pages.drupalcode.org/ai/2.0.x/modules/ai_assistant_api/ |
 
 ---
 
@@ -614,4 +829,4 @@ web/modules/contrib/ai_agents/
 
 ---
 
-*Generated for Drupal AI ecosystem documentation. Last updated: April 2026*
+*Generated for Drupal AI ecosystem documentation. Last updated: April 20, 2026*
