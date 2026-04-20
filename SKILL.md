@@ -1,6 +1,6 @@
 ---
-name: "ckeditor5-drupal-plugin"
-description: "Create Drupal modules that extend CKEditor 5 with custom plugins"
+name: drupal-module-ckeditor5-plugin
+description: This skill should be used when the user asks to "create a Drupal module with CKEditor plugin", "add a toolbar button to Drupal editor", "extend CKEditor 5 in Drupal", "build a custom WYSIWYG plugin for Drupal", "create a Drupal CKEditor integration", or mentions creating a Drupal module that extends CKEditor 5.
 argument-hint: "Describe the plugin functionality (e.g., 'insert timestamp button')"
 user-invocable: true
 ---
