@@ -1,4 +1,11 @@
-# SKILL: Extending CKEditor 5 with Custom Plugins in Drupal
+---
+name: "ckeditor5-drupal-plugin"
+description: "Create Drupal modules that extend CKEditor 5 with custom plugins"
+argument-hint: "Describe the plugin functionality (e.g., 'insert timestamp button')"
+user-invocable: true
+---
+
+# Extending CKEditor 5 with Custom Plugins in Drupal
 
 ## Overview
 
