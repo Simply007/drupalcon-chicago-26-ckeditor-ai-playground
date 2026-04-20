@@ -34,49 +34,67 @@ This document provides comprehensive visualizations and terminology definitions 
 
 This section provides a focused overview of the core Drupal AI entities and how they work together. Understanding these relationships is key to leveraging the full power of Drupal's AI ecosystem.
 
-## Entity Relationship Diagram
+## Drupal AI Entities Overview
 
 ```mermaid
-flowchart TB
-    subgraph External["External AI Services"]
-        LLM["LLMs<br><small>OpenAI, Anthropic, Ollama, etc.</small>"]
+flowchart LR
+    subgraph Legend[Drupal AI Entities]
+        direction TB
+        L_Provider[AI Provider<br>Wraps LLM communication]
+        L_Prompt[AI Prompt<br>Reusable templates]
+        L_Tool[AI Tool<br>Executable actions]
+        L_Agent[AI Agent<br>Autonomous task executor]
+        L_Assistant[AI Assistant<br>Chatbot configuration]
     end
 
-    subgraph ProviderLayer["AI Provider Layer"]
-        Provider["<b>AI Provider</b><br><small>Wraps ALL LLM communication</small>"]
-        Operations["Operation Types<br><small>Chat, Embeddings, TTS, STT, Moderation</small>"]
-        Provider --> Operations
+    subgraph Example[AI Assistant Example]
+        direction TB
+        User([User Request])
+        Assistant[AI Assistant<br>Drupal CMS Chatbot]
+        Prompt[AI Prompt<br>System instructions]
+        Agent[AI Agent<br>Content Type Agent]
+        Tool1[AI Tool<br>create_content_type]
+        Tool2[AI Tool<br>add_field]
+        Provider[AI Provider<br>Anthropic - Claude]
+        Result([Content type created])
+
+        User --> Assistant
+        Assistant --> Prompt
+        Prompt --> Agent
+        Agent --> Tool1
+        Agent --> Tool2
+        Tool1 --> Result
+        Tool2 --> Result
     end
 
-    subgraph Consumers["Consumer Entities"]
-        Agent["<b>AI Agent</b><br><small>Autonomous system with tools</small><br><small>Loops until task complete</small>"]
-        Assistant["<b>AI Assistant</b><br><small>Chatbot configuration</small><br><small>User-facing conversations</small>"]
-        Automator["<b>AI Automator</b><br><small>Field-level automation</small><br><small>Triggered on entity save</small>"]
-    end
+    LLM[(External LLM)]
 
-    Prompt["<b>AI Prompt</b><br><small>Reusable prompt templates</small>"]
+    Legend ~~~ Example
+    Agent <--> Provider
+    Provider <--> LLM
 
-    Tool["<b>AI Tool</b><br><small>Executable actions for Agents</small><br><small>(Function Calls, Assistant Actions)</small>"]
-
-    LLM <--> Provider
-
-    Operations --> Agent
-    Operations --> Assistant
-    Operations --> Automator
-
-    Prompt -.->|"provides prompts"| Agent
-    Prompt -.->|"provides prompts"| Assistant
-    Prompt -.->|"provides prompts"| Automator
-
-    Tool -.->|"available to"| Agent
+    style L_Provider fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style L_Prompt fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style L_Tool fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style L_Agent fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style L_Assistant fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 
     style Provider fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Prompt fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style Tool1 fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style Tool2 fill:#e0f2f1,stroke:#00695c,stroke-width:2px
     style Agent fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
     style Assistant fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Automator fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    style Prompt fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style Tool fill:#e0f2f1,stroke:#00695c,stroke-width:2px
 ```
+
+**Flow explanation:**
+1. **User** asks the chatbot to create a Blog content type
+2. **AI Assistant** (Drupal CMS Chatbot) receives the request
+3. **AI Prompt** provides system instructions defining the assistant's behavior
+4. **AI Agent** (Content Type Agent) is invoked to handle the task autonomously
+5. **AI Provider** sends requests to the external LLM (Claude/Anthropic)
+6. **AI Tools** execute the actual Drupal operations (`create_content_type()`, `add_field()`)
+7. **Result**: Blog content type is created in Drupal
 
 ## Entity Definitions Summary
 
